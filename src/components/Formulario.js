@@ -1,32 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Select from 'react-select';
 
 const Formulario = () => {
   const [nickname, setNickname] = useState('');
   const [colegio, setColegio] = useState('');
+  const [nivel, setNivel] = useState('');
   const [grado, setGrado] = useState('');
   const [seccion, setSeccion] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [error, setError] = useState('');
+  const [colegios, setColegios] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getColegios();
+  }, []);
+
+  const getColegios = async () => {
+    try {
+      const response = await axios.get('http://localhost:8080/colegios');
+      const colegiosOrdenados = response.data.sort((a, b) => a.nombre.localeCompare(b.nombre));
+      setColegios(colegiosOrdenados);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     // Validar campos requeridos
-    if (!nickname || !colegio || !grado || !seccion || !descripcion) {
+    if (!nickname || !colegio || !nivel || !grado || !seccion || !descripcion) {
       setError('Todos los campos son requeridos');
       return;
     }
 
     try {
+      const fechaActual = new Date(); // Obtener la fecha actual
       const response = await axios.post('http://localhost:8080/reportes', {
         nickname,
         colegio,
+        nivel,
         grado,
         seccion,
-        descripcion
+        descripcion,
+        fecha_pub: fechaActual // Enviar la fecha actual como java.util.Date
       });
 
       console.log(response.data); // Imprimir respuesta del servidor
@@ -57,13 +77,36 @@ const Formulario = () => {
         </div>
         <div className="mb-3">
           <label htmlFor="colegio" className="form-label">Colegio:</label>
-          <input
-            type="text"
-            className="form-control"
-            id="colegio"
-            value={colegio}
-            onChange={(event) => setColegio(event.target.value)}
+          <Select
+            options={colegios.map(colegio => ({ value: colegio.nombre, label: colegio.nombre }))}
+            value={{ value: colegio, label: colegio }}
+            onChange={(selectedOption) => setColegio(selectedOption.value)}
           />
+        </div>
+        <div className="mb-3">
+          <label className="form-label">Nivel:</label>
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="radio"
+              id="primaria"
+              value="Primaria"
+              checked={nivel === 'Primaria'}
+              onChange={() => setNivel('Primaria')}
+            />
+            <label className="form-check-label" htmlFor="primaria">Primaria</label>
+          </div>
+          <div className="form-check">
+            <input
+              className="form-check-input"
+              type="radio"
+              id="secundaria"
+              value="Secundaria"
+              checked={nivel === 'Secundaria'}
+              onChange={() => setNivel('Secundaria')}
+            />
+            <label className="form-check-label" htmlFor="secundaria">Secundaria</label>
+          </div>
         </div>
         <div className="mb-3">
           <label htmlFor="grado" className="form-label">Grado:</label>
@@ -99,6 +142,6 @@ const Formulario = () => {
       </form>
     </div>
   );
-}
+};
 
 export default Formulario;

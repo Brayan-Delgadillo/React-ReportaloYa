@@ -37,8 +37,10 @@ const ReportesGrados = () => {
           <tr>
             <th>ID</th>
             <th>Nickname</th>
+            <th>Fecha</th>
             <th>Descripción</th>
             <th>Colegio</th>
+            <th>Nivel</th>
             <th>Grado</th>
             <th>Sección</th>
           </tr>
@@ -48,8 +50,10 @@ const ReportesGrados = () => {
             <tr key={reporte.id}>
               <td>{reporte.id}</td>
               <td>{reporte.nickname}</td>
+              <td>{reporte.fecha_pub.slice(0, 10)}</td>
               <td>{reporte.descripcion}</td>
               <td>{reporte.colegio}</td>
+              <td>{reporte.nivel}</td>
               <td>{reporte.grado}</td>
               <td>{reporte.seccion}</td>
             </tr>
